@@ -246,9 +246,25 @@ void MissionPanel::Draw()
 // Only override the ones you need; the default action is to return false.
 bool MissionPanel::KeyDown(SDL_Keycode key, Uint16 mod, const Command &command, bool isNewPress)
 {
-	if(key == 'a' && CanAccept())
+	if(key == 'a')
 	{
-		Accept();
+		if(CanAccept())
+		{
+			Accept();
+		}
+		else
+		{
+			SelectNextSelectable();
+			if(!CanAccept())
+			{
+				Refresh();
+			}
+		}
+		return true;
+	}
+	else if(key == 'r')
+	{
+		Refresh();
 		return true;
 	}
 	else if(key == 'A' || (key == 'a' && (mod & KMOD_SHIFT)))
@@ -758,8 +774,7 @@ void MissionPanel::Accept()
 	
 	++availableIt;
 	player.AcceptJob(toAccept, GetUI());
-	if(availableIt == available.end() && !available.empty())
-		--availableIt;
+	SelectNextSelectable();
 	
 	// Check if any other jobs are available with the same destination. Prefer
 	// jobs that also have the same destination planet.
@@ -768,7 +783,7 @@ void MissionPanel::Accept()
 		const Planet *planet = toAccept.Destination();
 		const System *system = planet->GetSystem();
 		for(auto it = available.begin(); it != available.end(); ++it)
-			if(it->Destination() && it->Destination()->IsInSystem(system))
+			if(it->Destination() && it->Destination()->IsInSystem(system) && it->HasSpace(player))
 			{
 				availableIt = it;
 				if(it->Destination() == planet)
@@ -777,7 +792,39 @@ void MissionPanel::Accept()
 	}
 }
 
+void MissionPanel::Refresh()
+{
+	player.RefreshMissions();
+	availableIt = available.begin();
+	SelectNextSelectable();
+}
 
+void MissionPanel::SelectNextSelectable()
+{
+	if(available.empty())
+	{
+		availableIt = available.end();
+		return;
+	}
+	if(acceptedIt != accepted.end() || availableIt == available.end())
+	{
+		acceptedIt = accepted.end();
+		availableIt = available.begin();
+	}
+	auto it = availableIt;
+	while(it != available.end() && !it->HasSpace(player))
+		++it;
+	if(it != available.end())
+		availableIt = it;
+	else
+	{
+		// Reached the end without finding a selectable job. Wrap around.
+		it = available.begin();
+		while(it != availableIt && !it->HasSpace(player))
+			++it;
+		availableIt = it;
+	}
+}
 
 void MissionPanel::MakeSpaceAndAccept()
 {
