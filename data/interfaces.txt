@@ -834,12 +834,17 @@ interface "mission" bottom
 	
 	active if "can accept"
 	button a "_Accept Mission"
-		center -45 -25
+		center 0 -25
 		dimensions 130 30
 	
 	active if "can abort"
 	button A "Abort"
-		center 70 -25
+		center 113 -25
+		dimensions 80 30
+	
+	active
+	button r "Refresh"
+		center -117 -25
 		dimensions 80 30
 
 

@@ -64,6 +64,8 @@ private:
 	void Accept();
 	void MakeSpaceAndAccept();
 	void AbortMission();
+	void Refresh();
+	void SelectNextSelectable();
 	
 	int AcceptedVisible() const;
 	

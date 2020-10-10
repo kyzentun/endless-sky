@@ -2395,6 +2395,12 @@ void PlayerInfo::UpdateAutoConditions(bool isBoarding)
 	conditions["pirate attraction"] = factors.first - factors.second;
 }
 
+void PlayerInfo::RefreshMissions()
+{
+	availableJobs.clear();
+	availableMissions.clear();
+	CreateMissions();
+}
 
 
 // New missions are generated each time you land on a planet.
